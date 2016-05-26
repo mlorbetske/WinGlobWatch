@@ -1,0 +1,95 @@
+﻿<Window x:Class="WinGlobWatch.WpfApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WinGlobWatch.WpfApp"
+        xmlns:winGlobWatch="clr-namespace:WinGlobWatch"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="350" Width="525" d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel, IsDesignTimeCreatable=True}">
+    <Window.Resources>
+        <HierarchicalDataTemplate x:Key="TreeTemplate" ItemsSource="{Binding Path=Children, Mode=OneWay}" DataType="winGlobWatch:ModelState">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="{Binding Path=Name, Mode=OneWay}">
+                    <Label.Style>
+                        <Style TargetType="Label">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsDirty, Mode=OneWay, IsAsync=True}" Value="true">
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsIncluded, Mode=OneWay, IsAsync=True}" Value="false">
+                                    <Setter Property="Opacity" Value=".5" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Label.Style>
+                </Label>
+                <Label Content="{Binding Path=MatchedPattern.Metadata}" />
+            </StackPanel>
+        </HierarchicalDataTemplate>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="auto" />
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
+            Content="{Binding Path=CurrentRootDir, Mode=OneWay}" />
+
+        <TreeView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+            ItemsSource="{Binding Path=CurrentWatcher.Root.Children, Mode=OneWay}" ItemTemplate="{StaticResource TreeTemplate}">
+            <TreeView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel IsItemsHost="True" />
+                </ItemsPanelTemplate>
+            </TreeView.ItemsPanel>
+        </TreeView>
+
+        <TextBox Grid.Row="2" Grid.Column="0"
+            Text="{Binding Path=RootDir, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        <Button Grid.Row="2" Grid.Column="1" Content="Watch"
+            Command="{Binding Path=UpdateWatcherCommand, Mode=OneWay}" />
+        <Button Grid.Row="2" Grid.Column="2" Content="Clean"
+            Command="{Binding Path=SetCleanCommand, Mode=OneWay}" />
+
+        <ListBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding Patterns, Mode=OneWay}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Command="{Binding Path=RemovePatternCommand, Mode=OneWay}">x</Button>
+                        <Label Grid.Column="1" Content="{Binding Path=Text, Mode=OneWay}" />
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <Grid Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <ComboBox Grid.Column="0" Text="{Binding Path=PatternKind, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <ComboBoxItem>Include</ComboBoxItem>
+                <ComboBoxItem>Exclude</ComboBoxItem>
+            </ComboBox>
+
+            <TextBox Grid.Column="1" Text="{Binding Path=CurrentPattern, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <Button Grid.Column="2" Content="+" Command="{Binding Path=AddPatternCommand, Mode=OneWay}" />
+        </Grid>
+    </Grid>
+</Window>
