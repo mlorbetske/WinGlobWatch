@@ -2,7 +2,6 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows.Input;
-using System.Windows.Threading;
 
 namespace WinGlobWatch.WpfApp
 {

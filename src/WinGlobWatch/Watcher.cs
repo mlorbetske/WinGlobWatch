@@ -15,12 +15,24 @@ namespace WinGlobWatch
         private readonly string _root;
         private readonly FileSystemWatcher _watcher;
 
+        public Task Ready => _fileTree.Ready;
+
         private Watcher(string root, FileSystemWatcher watcher)
         {
             _root = root;
             _watcher = watcher;
             _patterns = new List<PatternEntry<TPattern>>();
             _fileTree = new FileTree<TPattern>(() => _patterns, root);
+        }
+
+        private void ProxyDirty(object sender, EventArgs e)
+        {
+            Dirty?.Invoke(this, e);
+        }
+
+        private void ProxyFilteredEntriesChanged(object sender, EventArgs e)
+        {
+            FilteredEntriesChanged?.Invoke(this, e);
         }
 
         public ModelState<TPattern> Root => _fileTree.Root;
@@ -54,6 +66,8 @@ namespace WinGlobWatch
                 watcher.EnableRaisingEvents = true;
                 await result._fileTree.ScanAsync();
                 result.RaisePropertyChanged(nameof(Root));
+                result._fileTree.FilteredEntriesChanged += result.ProxyFilteredEntriesChanged;
+                result._fileTree.Dirty += result.ProxyDirty;
                 return result;
             });
         }
@@ -76,6 +90,8 @@ namespace WinGlobWatch
         {
             Task<Watcher<TPattern>> watcher;
             Watchers.TryRemove(_root, out watcher);
+            _fileTree.FilteredEntriesChanged -= ProxyFilteredEntriesChanged;
+            _fileTree.Dirty -= ProxyDirty;
             _fileTree.Empty();
             _watcher.EnableRaisingEvents = true;
             _watcher.Renamed -= EntryRenamed;
@@ -84,6 +100,10 @@ namespace WinGlobWatch
             _watcher.Deleted -= EntryDeleted;
             _watcher.Dispose();
         }
+
+        public EventHandler Dirty;
+
+        public EventHandler FilteredEntriesChanged;
 
         private void EntryChanged(object sender, FileSystemEventArgs e)
         {

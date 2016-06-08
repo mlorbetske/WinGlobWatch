@@ -2,17 +2,14 @@
   "version": "1.0.0-*",
 
   "dependencies": {
-    "NETStandard.Library": "1.5.0-rc2-24027",
-    "System.IO.FileSystem.Watcher": "4.0.0-rc2-24103"
+    "NETStandard.Library": "1.5.0-rc2-24018",
+    "System.IO.FileSystem.Watcher": "4.0.0-rc2-24018",
+    "Minimatch": "2.0.0"
   },
 
   "frameworks": {
     "netstandard1.5": {
       "imports": "dnxcore50"
     }
-  },
-
-  "runtimes": {
-    "win10-x64": {}
   }
 }
